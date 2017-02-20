@@ -1,0 +1,6 @@
+[global]
+  editor=vim
+  ext=md
+
+[default]
+  path=~/notes
