@@ -13,7 +13,6 @@ from src.lib import log
 
 def main():
     args = lib.parse_commands()
-    config = lib.read_config()
 
     try:
         lib.validate_notebook(args.notebook)
@@ -24,45 +23,11 @@ def main():
         log.error('%s: Way to configure paths, slick', e)
         sys.exit(1)
 
-    notebook = args.notebook
-    subcommand = args.subcommand
-    timestamp = args.timestamp
+    if args.subcommand == 'update':
+        lib.update_note(args.notebook, args.filename, args.timestamp)
 
-    notebook_root = config[notebook]['path']
-    post_folder = os.path.join(notebook_root, '_posts')
-
-    if subcommand == 'update':
-        lib.update_note(notebook, args.filename, args.timestamp)
-
-    if subcommand == 'new':
-        if args.filename is None:
-            title = 'Untitled'
-        else:
-            title = args.filename[0]
-        log.debug('Creating a new note in %s', notebook)
-
-        date = datetime.date.today().strftime(lib.DATE_FMT)
-        title_slug = '-'.join(title.split())
-        filename = '-'.join([date, title_slug])
-        full_filename = '.'.join([filename, 'md'])
-        full_note_path = os.path.join(post_folder, full_filename)
-
-        editor = lib.text_editor(notebook)
-        initial_content = '---\ntitle: {0}\n\n---\n'.format(title)
-        with tempfile.NamedTemporaryFile(suffix='.md') as tf:
-            tf.write(initial_content.encode('utf-8'))
-            if timestamp:
-                tf.write(lib.create_timestamp())
-            tf.flush()
-            call([editor, tf.name])
-            tf.seek(0)
-            new_content = tf.read()
-        lib.write_note_content(full_note_path, new_content)
-
-
-        # TODO
-        log.debug('working filename: %s', full_filename)
-        log.debug('working filepath: %s', full_note_path)
+    if args.subcommand == 'new':
+        lib.new_note(args.notebook, args.filename, args.timestamp)
 
 
 if __name__ == '__main__':

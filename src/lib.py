@@ -108,6 +108,7 @@ def get_note_content(infile):
 def write_note_content(outfile, note):
     with open(outfile, 'w+b') as content:
         content.write(note)
+    log.info('Note saved')
 
 def update_note(notebook, filename=None, timestamp=False):
     if filename is None:
@@ -125,7 +126,49 @@ def update_note(notebook, filename=None, timestamp=False):
         call([editor, tf.name])
         tf.seek(0)
         new_content = tf.read()
-    write_note_content(file, new_content)
+    if current_content != new_content:
+        log.info('Saving note')
+        write_note_content(file, new_content)
+    else:
+        log.info('No change, note note saved or updated')
+
+def new_note(notebook, filename=None, timestamp=False):
+    config = read_config()
+    if filename is None:
+        title = 'Untitled'
+    else:
+        title = filename[0]
+    log.debug('Creating a new note in %s', notebook)
+
+    date = datetime.date.today().strftime(DATE_FMT)
+    title_slug = '-'.join(title.split())
+    filename = '-'.join([date, title_slug])
+    full_filename = '.'.join([filename, 'md'])
+
+    post_folder = os.path.join(config[notebook]['path'], '_posts')
+    full_note_path = os.path.join(post_folder, full_filename)
+
+    editor = text_editor(notebook)
+    if template in config[notebook]:
+        initial_content = get_note_content(config[notebook]['template'])
+    elif template in config['global']:
+        initial_content = get_note_content(config['global']['template'])
+    else:
+        initial_content = get_note_content('template.md')
+
+    with tempfile.NamedTemporaryFile(suffix='.md') as tf:
+        tf.write(initial_content.encode('utf-8'))
+        if timestamp:
+            tf.write(lib.create_timestamp())
+        tf.flush()
+        call([editor, tf.name])
+        tf.seek(0)
+        new_content = tf.read()
+    if initial_content != new_content:
+        log.info('Saving note')
+        write_note_content(full_note_path, new_content)
+    else:
+        log.info('No change, note note saved or updated')
 
 def create_timestamp():
     time = datetime.datetime.now().strftime(TIME_FMT)
