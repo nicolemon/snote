@@ -14,6 +14,8 @@ from subprocess import call
 log = logging.getLogger(__name__)
 log.addHandler(logging.StreamHandler(sys.stdout))
 
+CONFIG_FILE = os.getenv('SNOTE', None)
+
 debug = os.getenv('SNOTE_DEBUG', False)
 if debug:
     log.setLevel(logging.DEBUG)
@@ -33,9 +35,13 @@ def print_header():
 ''')
 
 def read_config():
-    config = configparser.ConfigParser()
-    config.read(['.snoterc'])
-    return config
+    if CONFIG_FILE:
+        config = configparser.ConfigParser()
+        config.read([CONFIG_FILE])
+        return config
+    else:
+        log.error('Config file not set, check documentation for more details.')
+        sys.exit(1)
 
 def parse_commands():
     parser = argparse.ArgumentParser()

@@ -5,11 +5,11 @@ import sys
 import os
 import logging
 import datetime
-import lib
+import src.lib as lib
 import tempfile
 import subprocess
 from subprocess import call
-from lib import log
+from src.lib import log
 
 def main():
     args = lib.parse_commands()
