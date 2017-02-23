@@ -1,0 +1,7 @@
+[global]
+  editor=vim
+  ext=md
+  template=/path/to/template/file
+
+[notebook]
+  path=/abs/path/to/notebook/directory
