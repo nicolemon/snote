@@ -149,15 +149,15 @@ def new_note(notebook, filename=None, timestamp=False):
     full_note_path = os.path.join(post_folder, full_filename)
 
     editor = text_editor(notebook)
-    if template in config[notebook]:
+    if 'template' in config[notebook]:
         initial_content = get_note_content(config[notebook]['template'])
-    elif template in config['global']:
+    elif 'template' in config['global']:
         initial_content = get_note_content(config['global']['template'])
     else:
         initial_content = get_note_content('template.md')
 
     with tempfile.NamedTemporaryFile(suffix='.md') as tf:
-        tf.write(initial_content.encode('utf-8'))
+        tf.write(initial_content)
         if timestamp:
             tf.write(lib.create_timestamp())
         tf.flush()
