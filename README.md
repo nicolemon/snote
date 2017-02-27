@@ -1,5 +1,7 @@
 # snote
 
+Rudimentary CLI to write and organize text.
+
 ## Requirements
 
 - Python 3.5+ (Sorry, I know)
@@ -47,3 +49,6 @@ Global settings can be overwritten at a notebook level.
       -t, --timestamp       add a timestamp to the editor
       -f FILENAME, --filename FILENAME
 
+## Motivaton
+
+I wrote this for myself as a way to catalog my stream of consciousness.
