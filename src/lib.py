@@ -60,7 +60,7 @@ def most_recent(notebook):
     """Returns absolute path to most recently modified note in notebook."""
 
     config = read_config()
-    post_folder = os.path.join(config[notebook]['path'], '_posts')
+    post_folder = os.path.join(config[notebook]['path'])
     last_modified_ts = 0.0
     last_modified = None
     with os.scandir(post_folder) as it:
@@ -146,7 +146,7 @@ def new_note(notebook, filename=None, timestamp=False):
     filename = '-'.join([date, title_slug])
     full_filename = '.'.join([filename, 'md'])
 
-    post_folder = os.path.join(config[notebook]['path'], '_posts')
+    post_folder = os.path.join(config[notebook]['path'])
     full_note_path = os.path.join(post_folder, full_filename)
 
     editor = text_editor(notebook)
