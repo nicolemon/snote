@@ -7,6 +7,7 @@ import subprocess
 import datetime
 import os
 import logging
+import re
 import argparse
 import configparser
 from subprocess import call
@@ -155,6 +156,10 @@ def new_note(notebook, filename=None, timestamp=False):
         initial_content = get_note_content(config['global']['template'])
     else:
         initial_content = get_note_content('template.md')
+
+    template_title = re.compile('%FILE%')
+    initial_content = template_title.sub(title, initial_content.decode('utf-8'))
+    initial_content = initial_content.encode('utf-8')
 
     with tempfile.NamedTemporaryFile(suffix='.md') as tf:
         tf.write(initial_content)
