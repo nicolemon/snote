@@ -51,7 +51,7 @@ def parse_commands():
     parser.add_argument('-f', '--filename', nargs=1, default=None)
     parser.add_argument('notebook', help='access notebook')
     parser.add_argument('subcommand', nargs='?', choices=['new', 'update'],
-                        default='update')
+                        default='update', help='defaults to update')
     args = parser.parse_args()
     log.debug('parse_commands: %s', args)
     return args
