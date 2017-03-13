@@ -164,7 +164,7 @@ def new_note(notebook, filename=None, timestamp=False):
     with tempfile.NamedTemporaryFile(suffix='.md') as tf:
         tf.write(initial_content)
         if timestamp:
-            tf.write(lib.create_timestamp())
+            tf.write(create_timestamp())
         tf.flush()
         call([editor, tf.name])
         tf.seek(0)
