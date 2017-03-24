@@ -17,10 +17,10 @@ def main():
     try:
         lib.validate_notebook(args.notebook)
     except lib.UnknownNotebookError as e:
-        log.error('%s: I do not know that notebook', e)
+        log.error(e)
         sys.exit(1)
     except lib.InvalidNotebookPathError:
-        log.error('%s: Way to configure paths, slick', e)
+        log.error(e)
         sys.exit(1)
 
     if args.subcommand == 'update':

@@ -24,16 +24,18 @@ if debug:
 DATE_FMT = '%Y-%m-%d'
 TIME_FMT = '%H:%M:%S'
 
+
 def print_header():
     print('''
-                 _       
-                | |      
- ___ _ __   ___ | |_ ___ 
+                 _
+                | |
+ ___ _ __   ___ | |_ ___
 / __| '_ \ / _ \| __/ _ \\
 \__ \ | | | (_) | ||  __/
 |___/_| |_|\___/ \__\___|
 
 ''')
+
 
 def read_config():
     if CONFIG_FILE:
@@ -44,10 +46,11 @@ def read_config():
         log.error('Config file not set, check documentation for more details.')
         sys.exit(1)
 
+
 def parse_commands():
     parser = argparse.ArgumentParser()
     parser.add_argument('-t', '--timestamp', action='store_true', help='add a'
-                       ' timestamp to the editor')
+                        ' timestamp to the editor')
     parser.add_argument('-f', '--filename', nargs=1, default=None)
     parser.add_argument('notebook', help='access notebook')
     parser.add_argument('subcommand', nargs='?', choices=['new', 'update'],
@@ -55,6 +58,7 @@ def parse_commands():
     args = parser.parse_args()
     log.debug('parse_commands: %s', args)
     return args
+
 
 def most_recent(notebook):
     """Returns absolute path to most recently modified note in notebook."""
@@ -70,6 +74,7 @@ def most_recent(notebook):
                 last_modified_ts = entry_stat
                 last_modified = entry
     return last_modified.path
+
 
 def validate_notebook(notebook):
     """Returns True if notebook is configured with a valid path."""
@@ -88,6 +93,7 @@ def validate_notebook(notebook):
     else:
         raise InvalidNotebookPathError(abs_path)
 
+
 def text_editor(notebook):
     """Returns string representation of editor (vim, nano, emacs)."""
     config = read_config()
@@ -100,16 +106,19 @@ def text_editor(notebook):
 
     return editor
 
+
 def get_note_content(infile):
     note = b''
     with open(infile, 'r+b') as content:
         note = content.read()
     return note
 
+
 def write_note_content(outfile, note):
     with open(outfile, 'w+b') as content:
         content.write(note)
     log.info('Note saved')
+
 
 def update_note(notebook, filename=None, timestamp=False):
     if filename is None:
@@ -119,7 +128,7 @@ def update_note(notebook, filename=None, timestamp=False):
 
     editor = text_editor(notebook)
     current_content = get_note_content(file)
-    with tempfile.NamedTemporaryFile(suffix='.md') as tf:
+    with tempfile.NamedTemporaryFile(suffix='.md', prefix='esnote_') as tf:
         tf.write(current_content)
         if timestamp:
             tf.write(create_timestamp())
@@ -128,10 +137,11 @@ def update_note(notebook, filename=None, timestamp=False):
         tf.seek(0)
         new_content = tf.read()
     if current_content != new_content:
-        log.info('Saving note')
+        log.info('Updating note')
         write_note_content(file, new_content)
     else:
         log.info('No change, note note saved or updated')
+
 
 def new_note(notebook, filename=None, timestamp=False):
     config = read_config()
@@ -158,10 +168,11 @@ def new_note(notebook, filename=None, timestamp=False):
         initial_content = get_note_content('template.md')
 
     template_title = re.compile('%FILE%')
-    initial_content = template_title.sub(title, initial_content.decode('utf-8'))
+    initial_content = template_title.sub(
+        title, initial_content.decode('utf-8'))
     initial_content = initial_content.encode('utf-8')
 
-    with tempfile.NamedTemporaryFile(suffix='.md') as tf:
+    with tempfile.NamedTemporaryFile(suffix='.md', prefix='nsnote_') as tf:
         tf.write(initial_content)
         if timestamp:
             tf.write(create_timestamp())
@@ -174,6 +185,7 @@ def new_note(notebook, filename=None, timestamp=False):
         write_note_content(full_note_path, new_content)
     else:
         log.info('No change, note note saved or updated')
+
 
 def create_timestamp():
     time = datetime.datetime.now().strftime(TIME_FMT)
