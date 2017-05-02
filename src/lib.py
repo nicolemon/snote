@@ -121,6 +121,7 @@ def write_note_content(outfile, note):
 
 
 def update_note(notebook, filename=None, timestamp=False):
+    config = read_config()
     if filename is None:
         file = most_recent(notebook)
     else:
@@ -128,7 +129,9 @@ def update_note(notebook, filename=None, timestamp=False):
 
     editor = text_editor(notebook)
     current_content = get_note_content(file)
-    with tempfile.NamedTemporaryFile(suffix='.md', prefix='esnote_') as tf:
+    post_folder = os.path.join(config[notebook]['path'])
+    with tempfile.NamedTemporaryFile(suffix='.md', prefix='esnote_',
+                                     dir=post_folder) as tf:
         tf.write(current_content)
         if timestamp:
             tf.write(create_timestamp())
@@ -172,7 +175,8 @@ def new_note(notebook, filename=None, timestamp=False):
         title, initial_content.decode('utf-8'))
     initial_content = initial_content.encode('utf-8')
 
-    with tempfile.NamedTemporaryFile(suffix='.md', prefix='nsnote_') as tf:
+    with tempfile.NamedTemporaryFile(suffix='.md', prefix='nsnote_',
+                                     dir=post_folder) as tf:
         tf.write(initial_content)
         if timestamp:
             tf.write(create_timestamp())
