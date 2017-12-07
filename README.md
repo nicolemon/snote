@@ -4,13 +4,7 @@ Rudimentary CLI to write and organize text.
 
 ## Requirements
 
-- Python 3.5+ (Sorry, I know)
-
-## Installation
-
-1. Clone repository
-2. Add `snote` executable to the bin via symlinking or however you want
-3. Environment variable `SNOTE` is the absolute path to your configuration file
+- ~=Python 3.5
 
 ## Configuration
 
@@ -21,7 +15,7 @@ Rudimentary CLI to write and organize text.
     - `ext` default extension for any notes
     - `template` (optional) default template for new notes
 
-Global settings can be overwritten at a notebook level.
+All global settings can be overwritten at a notebook level.
 
 ### Notebooks
 
@@ -29,14 +23,6 @@ Global settings can be overwritten at a notebook level.
     - `path` absolute path to where the notes are saved
 
 ## Usage
-
-                     _
-                    | |
-     ___ _ __   ___ | |_ ___
-    / __| '_ \ / _ \| __/ _ \
-    \__ \ | | | (_) | ||  __/
-    |___/_| |_|\___/ \__\___|
-
 
     usage: snote [-h] [-t] [-f FILENAME] notebook [{new,update}]
 
