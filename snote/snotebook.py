@@ -31,7 +31,8 @@ class Snotebook(object):
         log.info('Note saved')
 
     def call_writer(self, load_content, timestamp):
-        with tempfile.NamedTemporaryFile(suffix=self.ext, prefix='newsnote_',
+        with tempfile.NamedTemporaryFile(suffix='.{ext}'.format(ext=self.ext),
+                                         prefix='newsnote_',
                                          dir=self.location) as tf:
             tf.write(load_content)
             if timestamp:
@@ -66,7 +67,7 @@ class Snotebook(object):
 
     @property
     def ext(self):
-        return '.{ext}'.format(ext=self._ext)
+        return self._ext
 
     @property
     def template(self):
