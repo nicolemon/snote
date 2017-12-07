@@ -66,12 +66,12 @@ class Snotebook(object):
 
     @property
     def ext(self):
-        return self._ext
+        return '.{ext}'.format(ext=self._ext)
 
     @property
     def template(self):
         if self._template:
-            return Snotebook.get_note(self._template)
+            return Snotebook.get_note(self._template).decode('utf-8')
         else:
             return ''
 
@@ -83,7 +83,7 @@ class Snotebook(object):
         timestamp = '\n[{time}]\n'.format(time=current_time)
         return timestamp.encode('utf-8')
 
-    def get_note_location(self, filename=None):
+    def find_note(self, filename=None):
         """Return path to the most recently modified note in notebook, or the
         note with the specified filename"""
         if filename is None:
@@ -113,7 +113,7 @@ class Snotebook(object):
 
         initial_content = Snotebook.TEMPLATE_TITLE.sub(title, self.template)
 
-        new_content = self.call_writer(initial_content, timestamp)
+        new_content = self.call_writer(initial_content.encode('utf-8'), timestamp)
 
         if initial_content != new_content:
             log.info('Saving note')
@@ -123,7 +123,7 @@ class Snotebook(object):
 
     def update_note(self, filename=None, timestamp=False):
         try:
-            full_notepath = self.get_note_location(filename)
+            full_notepath = self.find_note(filename)
         except NotImplementedError as e:
             log.error(e)
             sys.exit(1)
