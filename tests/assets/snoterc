@@ -1,0 +1,23 @@
+[global]
+  editor=vim
+  ext=md
+  datefmt="%Y-%m-%d"
+  timefmt="%H:%M:%S"
+  template=$HOME/snote-assets/template1
+
+[nb1]
+  path=$HOME/snotebooks/nb1
+  timefmt="%H:%M"
+
+[nb2]
+  path=$HOME/snotebooks/nb2
+  datefmt="%Y %B %d"
+  template=$HOME/snote-assets/template2
+  ext=html
+
+[nb3]
+  path=$HOME/snotebooks/nb3
+  ext=txt
+
+[badpath]
+  path=/path/does/not/exist

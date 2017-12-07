@@ -1,0 +1,30 @@
+sudo: false
+language: python
+branches:
+  only:
+  - master
+  - develop
+os:
+  - linux
+python:
+  - "3.5"
+  - "3.5-dev" # 3.5 development branch
+  - "3.6"
+  - "3.6-dev" # 3.6 development branch
+  - "3.7-dev" # 3.7 development branch
+  - "nightly"
+before_script:  # commands to run before running tests
+  - cp -R "$TRAVIS_BUILD_DIR/tests/assets" "$HOME/snote-assets"
+  - mkdir -p "$HOME/snotebooks/nb1"
+  - mkdir -p "$HOME/snotebooks/nb2"
+  - mkdir -p "$HOME/snotebooks/nb3"
+script:
+  - python setup.py install
+  - pytest
+after_script:
+  - rm -rf "$HOME/snote-assets"
+  - rm -rf "$HOME/snotebooks"
+env: 
+  global:
+    - SNOTE="$HOME/snote-assets/snoterc"
+    - SNOTE_DEBUG=True
