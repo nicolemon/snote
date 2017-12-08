@@ -18,7 +18,7 @@ DEFAULTS = {
     'ext': 'md',
     'datefmt': '%Y-%m-%d',
     'timefmt': '%H:%M:%S',
-    'timestamp': '\n{time}'
+    'timestamp': '\n{time}',
     'template': None,
     'default_title': 'untitled'
 }

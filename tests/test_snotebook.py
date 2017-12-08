@@ -40,3 +40,5 @@ def test_snotebook_properties(file_config, snotebook):
     assert snotebook.location == file_config.get(name, 'path')
     assert snotebook.editor == file_config.get(name, 'editor')
     assert snotebook.ext == file_config.get(name, 'ext')
+    assert snotebook.default_title == file_config.get(name, 'default_title')
+    assert snotebook._timestamp == file_config.get(name, 'timestamp')
