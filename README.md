@@ -1,26 +1,19 @@
 # snote
 
+[![Build Status](https://travis-ci.org/nicolemon/snote.svg?branch=master)](https://travis-ci.org/nicolemon/snote)
+
 Rudimentary CLI to write and organize text.
 
-## Requirements
+## Install
 
-- ~=Python 3.5
+`pip install snotebooks` will install whatever is on master
+
+Downloading the repo and firing off `python setup.py install` works, too.
 
 ## Configuration
 
-### Global
-
-- `global` setting support
-    - `editor` default editor for writing notes
-    - `ext` default extension for any notes
-    - `template` (optional) default template for new notes
-
-All global settings can be overwritten at a notebook level.
-
-### Notebooks
-
-- `[<notebok name>]`
-    - `path` absolute path to where the notes are saved
+Reads configuration from whichever file to which environment variable `SNOTE`
+points.
 
 ## Usage
 
@@ -37,4 +30,5 @@ All global settings can be overwritten at a notebook level.
 
 ## Motivaton
 
-I wrote this for myself as a way to catalog my stream of consciousness.
+I wrote this for myself as a way to catalog my stream of consciousness, and an
+exercise in packaging.
