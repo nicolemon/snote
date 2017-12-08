@@ -12,7 +12,7 @@ def read(fname):
     return open(os.path.join(os.path.dirname(__file__), fname)).read()
 
 setup(
-    name = "snote",
+    name = "snotebooks",
     version = "1.0.0-alpha",
     author = "Nicole A Montano",
     author_email = "n@nicolemon.com",
