@@ -76,7 +76,8 @@ def _read_configuration():
 
     config = configparser.ConfigParser(defaults=DEFAULTS,
                                        default_section='global',
-                                       interpolation=None)
+                                       interpolation=None,
+                                       allow_no_value=True)
     with open(config_file, 'r') as cfg:
         cfg_txt = os.path.expandvars(cfg.read())
     config.read_string(cfg_txt)
