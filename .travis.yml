@@ -19,7 +19,6 @@ before_script:  # commands to run before running tests
   - mkdir -p "$HOME/snotebooks/nb2"
   - mkdir -p "$HOME/snotebooks/nb3"
 script:
-  - python setup.py install
   - pytest
 after_script:
   - rm -rf "$HOME/snote-assets"
