@@ -18,7 +18,9 @@ DEFAULTS = {
     'ext': 'md',
     'datefmt': '%Y-%m-%d',
     'timefmt': '%H:%M:%S',
-    'template': ''
+    'timestamp': '\n{time}'
+    'template': None,
+    'default_title': 'untitled'
 }
 
 debug = os.getenv('SNOTE_DEBUG', False)
@@ -44,7 +46,7 @@ def main():
     except UnknownNotebookError as e:
         log.error(e)
         sys.exit(1)
-    except InvalidNotebookPathError:
+    except InvalidNotebookPathError as e:
         log.error(e)
         sys.exit(1)
 
@@ -103,7 +105,9 @@ def _get_snotebook(notebook):
         'ext': config.get(notebook, 'ext'),
         'datefmt': config.get(notebook, 'datefmt'),
         'timefmt': config.get(notebook, 'timefmt'),
-        'template': config.get(notebook, 'template')
+        'timestamp': config.get(notebook, 'timestamp'),
+        'template': config.get(notebook, 'template'),
+        'default_title': config.get(notebook, 'default_title')
     }
 
     return Snotebook(**snotebook_cfg)
