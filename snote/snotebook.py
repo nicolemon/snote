@@ -9,7 +9,14 @@ import tempfile
 import logging
 
 log = logging.getLogger("snotebook")
-log.addHandler(logging.StreamHandler(sys.stdout))
+
+
+def filestat_name(dir_entry):  # TODO look into making lambda functions tho
+    return dir_entry.name.lower()
+
+
+def filestat_created(dir_entry):
+    return os.stat(dir_entry).st_birthtime
 
 
 class Snotebook(object):
@@ -59,7 +66,7 @@ class Snotebook(object):
                 tf.write(self.time())
             tf.flush()
             subprocess.call([self.editor, tf.name])
-            tf.seek(0)  # hand tight until subprocess is done!
+            tf.seek(0)  # hang tight until subprocess is done
             new_content = tf.read()
 
         return new_content
@@ -129,23 +136,84 @@ class Snotebook(object):
         timestamp = self._timestamp.format(time=current_time)
         return timestamp.encode('utf-8')
 
-    def find_note(self, filename=None):  # TODO file searching
+    def find_note(self, filename=None):
         '''
         Return path to the most recently modified note in notebook, or the
         note with the specified filename
         '''
-        if filename is None:
-            last_modified_ts = 0.0
-            last_modified = None
-            with os.scandir(self.location) as it:
-                for entry in it:
-                    entry_stat = os.stat(entry).st_mtime
-                    if entry_stat > last_modified_ts:
-                        last_modified_ts = entry_stat
-                        last_modified = entry
-            return last_modified.path
+        if filename:
+            notes = self._search_notes(filename.pop())
+            return self._select_note(notes)
         else:
-            raise NotImplementedError('Note searching not yet implemented')
+            return self._last_note()
+
+    def _list_notes(self, sort_by='name', reverse=False):
+        '''
+        Return list of notes in notebook (as os.DirEntry) sorted accordingly
+        '''
+
+        note_list = list()
+        with os.scandir(self.location) as it:
+            for entry in it:
+                note_list.append(entry)
+
+        if sort_by == 'name':
+            note_list.sort(key=filestat_name, reverse=reverse)
+        elif sort_by == 'last':
+            note_list.sort(key=filestat_created, reverse=reverse)
+
+        return note_list
+
+    def _select_note(self, note_list):  # FIXME refactor/make better thanks
+        '''
+        Prompt user with list of DirEntry objects from which to select
+        '''
+        selection = None
+        if len(note_list) > 1:
+            with sys.stdout as prompt:
+                prompt.write('Multiple notes found\n')
+                for idx, file in enumerate(note_list):
+                    note = '[{idx}] {filename}\n'.format(idx=idx + 1, filename=file.name)
+                    prompt.write(note)
+                prompt.write('Select: ')
+
+            with sys.stdin as stream:
+                selection = stream.readline()
+
+        if selection:
+            try:
+                select_idx = int(selection) - 1
+                note = note_list[select_idx]
+                log.debug('Selected note %s', note.name)
+                return note.path
+            except IndexError as e:
+                log.error('%s: Invalid selection entered', e)
+                sys.exit(1)
+        else:
+            return self._last_note()
+
+    def _last_note(self):
+        '''
+        Return path to the most recently created (not modified) note in
+        notebook
+        '''
+        last_modified = self._list_notes('last').pop()
+        return last_modified.path
+
+    def _search_notes(self, search):
+        '''
+        Return list of files in notebook directory that contain the search term
+        '''
+        matches = list()
+        for note in self._list_notes():
+            if search in note.name:
+                matches.append(note)
+
+        if len(matches) > 0:
+            return matches
+        else:
+            log.info('No note name containing \'%s\' found', search)
+            sys.exit(1)
 
     def new_note(self, filename=None, timestamp=False):  # FIXME refactor more
         '''
@@ -153,7 +221,7 @@ class Snotebook(object):
         snotebook folder upon exit if any changes have been made
         '''
         if filename:
-            title = filename[0]
+            title = filename.pop()
         else:
             title = self.default_title
 
@@ -178,11 +246,7 @@ class Snotebook(object):
         writer, saves to snotebook folder upon exit of any changes have been
         made
         '''
-        try:
-            full_notepath = self.find_note(filename)
-        except NotImplementedError as e:
-            log.error(e)
-            sys.exit(1)
+        full_notepath = self.find_note(filename)
 
         initial_content = Snotebook.get_note(full_notepath)
 
