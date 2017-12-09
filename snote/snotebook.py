@@ -153,9 +153,8 @@ class Snotebook(object):
         '''
 
         note_list = list()
-        with os.scandir(self.location) as it:
-            for entry in it:
-                note_list.append(entry)
+        for entry in os.scandir(self.location):
+            note_list.append(entry)
 
         if sort_by == 'name':
             note_list.sort(key=filestat_name, reverse=reverse)
