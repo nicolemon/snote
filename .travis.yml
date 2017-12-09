@@ -14,10 +14,7 @@ python:
   - "3.7-dev" # 3.7 development branch
   - "nightly"
 before_script:  # commands to run before running tests
-  - cp -R "$TRAVIS_BUILD_DIR/tests/assets" "$HOME/snote-assets"
-  - mkdir -p "$HOME/snotebooks/nb1"
-  - mkdir -p "$HOME/snotebooks/nb2"
-  - mkdir -p "$HOME/snotebooks/nb3"
+  - "$TRAVIS_BUILD_DIR/tests/init"
 script:
   - pytest
 after_script:
