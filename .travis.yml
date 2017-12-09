@@ -16,7 +16,7 @@ python:
 before_script:  # commands to run before running tests
   - "$TRAVIS_BUILD_DIR/tests/init"
 script:
-  - pytest
+  - pytest -v
 after_script:
   - rm -rf "$HOME/snote-assets"
   - rm -rf "$HOME/snotebooks"

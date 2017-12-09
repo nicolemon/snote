@@ -16,7 +16,10 @@ def filestat_name(dir_entry):  # TODO look into making lambda functions tho
 
 
 def filestat_created(dir_entry):
-    return os.stat(dir_entry).st_birthtime
+    try:
+        return dir_entry.stat().st_birthtime
+    except AttributeError:
+        return dir_entry.stat().st_ctime
 
 
 class Snotebook(object):
