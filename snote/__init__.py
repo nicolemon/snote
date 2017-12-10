@@ -12,16 +12,10 @@ def main():
     parser = SnoteParser()
     args = parser.parse_args()
 
-    try:
-        sb = Snotebook.get_snotebook(args.notebook)
+    sb = Snotebook.get_snotebook(args.notebook)
 
-        if args.subcommand == 'update':
-            sb.update_note(args.filename, args.timestamp)
+    if args.subcommand == 'update':
+        sb.update_note(args.filename, args.timestamp)
 
-        if args.subcommand == 'new':
-            sb.new_note(args.filename, args.timestamp)
-
-    except exceptions.UnknownNotebookError as e:
-        log.error(e)
-    except exceptions.InvalidNotebookPathError as e:
-        log.error(e)
+    if args.subcommand == 'new':
+        sb.new_note(args.filename, args.timestamp)
