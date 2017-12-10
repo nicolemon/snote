@@ -7,4 +7,4 @@ from . import snotebook
 from . import exceptions
 
 
-VERSION = '1.0.0a3'
+VERSION = '1.0.0a4'
