@@ -192,7 +192,7 @@ class Snotebook(object):
                 log.error('%s: Invalid selection entered', e)
                 sys.exit(1)
         else:
-            return self._last_note()
+            return note_list.pop().path
 
     def _last_note(self):
         '''
