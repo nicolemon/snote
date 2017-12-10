@@ -13,7 +13,7 @@ def read(fname):
 
 setup(
     name = "snotebooks",
-    version = "1.0.0a4",
+    version = "0.0.1",
     author = "Nicole A Montano",
     author_email = "n@nicolemon.com",
     description = ("A rudimentary CLI to write and organize text"),

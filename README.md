@@ -4,11 +4,12 @@
 
 Rudimentary CLI to write and organize text.
 
+I've got a ways to go in terms of features and documentation. Pull requests are
+neat.
+
 ## Install
 
-`pip install snotebooks` will install whatever is on master
-
-Downloading the repo and firing off `python setup.py install` works, too.
+Downloading the repo and firing off `python setup.py install` does the trick.
 
 ## Configuration
 
@@ -16,7 +17,7 @@ Reads configuration from whichever file to which environment variable `SNOTE`
 points.
 
 Each notebook requires a valid path, where notes will be saved. Global settings
-apply to all notebooks, and are overwritten at a notebook level.
+apply to all notebooks, and may be overwritten at a notebook level.
 
     [global]
     editor=vim
@@ -26,10 +27,10 @@ apply to all notebooks, and are overwritten at a notebook level.
     timestamp=[{time}]
     template=/path/to/template/file
     default_title='no title'
-    
+
     [my-notebook]
     path=/path/to/directory
-    
+
     [another]
     path=/path/to/another/directory
     editor=nano
