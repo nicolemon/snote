@@ -250,7 +250,7 @@ class Snotebook(object):
         if len(matches) > 0:
             return matches
         else:
-            log.info('No file containing \'%s\' found', search)
+            log.info('No file containing \'%s\' found', search_term)
             sys.exit(1)
 
     def _search_note_content(self, search_term):

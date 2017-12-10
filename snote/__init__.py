@@ -5,7 +5,7 @@ from . import (lib, exceptions)
 from .snotebook import (SnoteParser, Snotebook)
 
 
-VERSION = '0.0.2a'
+VERSION = '0.0.3a'
 
 
 def main():
