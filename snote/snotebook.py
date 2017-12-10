@@ -1,78 +1,85 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+
 import os
 import sys
-import re
 import datetime
 import subprocess
 import tempfile
 import logging
+import argparse
+from . import lib
+from .exceptions import (UnknownNotebookError, InvalidNotebookPathError)
 
-log = logging.getLogger("snotebook")
+log = logging.getLogger(__name__)
 
 
-def filestat_name(dir_entry):  # TODO look into making lambda functions tho
-    return dir_entry.name.lower()
+class SnoteParser(argparse.ArgumentParser):
 
+    def __init__(self):
+        super(SnoteParser, self).__init__()
 
-def filestat_created(dir_entry):
-    try:
-        return dir_entry.stat().st_birthtime
-    except AttributeError:
-        return dir_entry.stat().st_ctime
+        self.add_argument('notebook', help='access notebook')
+
+        self.add_argument(
+            'subcommand',
+            nargs='?',
+            choices=['new', 'update'],
+            default='update',
+            help='defaults to update'
+        )
+
+        self.add_argument(
+            '-t',
+            '--timestamp',
+            action='store_true',
+            help='add a timestamp to the note'
+        )
+
+        self.add_argument(
+            '-f',
+            '--filename',
+            nargs=1,
+            default=None,
+            help='name a new note, or search for a note to update'
+        )
 
 
 class Snotebook(object):
     """container class to simplify access to configuration settings"""
 
-    TEMPLATE_TITLE = re.compile('%TITLE%')
-
     @staticmethod
-    def get_note(filepath):  # returns bytes
-        '''
-        Load and return content of file object at filepath
+    def get_snotebook(notebook):
+        """
+        Given the name of a configured Snotebook, returns Snotebook object
+        """
 
-        :param filepath: valid filepath
-        :returns: as bytes object
-        '''
-        note = b''
-        with open(filepath, 'r+b') as content:
-            note = content.read()
-        return note
+        config = lib.get_config()
 
-    @staticmethod
-    def write_note(filepath, note):  # write bytes
-        '''
-        Writes to filepath with the content of note
+        if config.has_section(notebook):
+            log.debug('Notebook %s exists', notebook)
+        else:
+            raise UnknownNotebookError(notebook)
 
-        :param filepath: valid filepath
-        :param note: str representation of content to write
-        '''
-        with open(filepath, 'w+b') as content:
-            content.write(note)
-        log.info('Note saved')
+        notebook_path = config.get(notebook, 'path')
+        if os.path.exists(notebook_path):
+            log.debug('Configured notebook path %s exists', notebook_path)
+        else:
+            raise InvalidNotebookPathError(notebook_path)
 
-    def call_writer(self, load_content, timestamp):
-        '''
-        Opens a temporary file with the configured editor and loads whatever
-        prexisting content is passed in.
+        snotebook_cfg = {
+            'name': notebook,
+            'location': notebook_path,
+            'editor': config.get(notebook, 'editor'),
+            'ext': config.get(notebook, 'ext'),
+            'datefmt': config.get(notebook, 'datefmt'),
+            'timefmt': config.get(notebook, 'timefmt'),
+            'timestamp': config.get(notebook, 'timestamp'),
+            'template': config.get(notebook, 'template'),
+            'default_title': config.get(notebook, 'default_title')
+        }
 
-        :param load_content: str representation of content to load in editor
-        :param timestamp: bool - True to add timestamp
-        :returns: str of everything in the editor at exit
-        '''
-        with tempfile.NamedTemporaryFile(suffix='.{ext}'.format(ext=self.ext),
-                                         prefix='newsnote_',
-                                         dir=self.location) as tf:
-            tf.write(load_content)
-            if timestamp:
-                tf.write(self.time())
-            tf.flush()
-            subprocess.call([self.editor, tf.name])
-            tf.seek(0)  # hang tight until subprocess is done
-            new_content = tf.read()
-
-        return new_content
+        return Snotebook(**snotebook_cfg)
 
     def __init__(self, name, location, editor='vim', ext='md',
                  datefmt='%Y-%m-%d', timefmt='%H:%M:%S',
@@ -110,7 +117,7 @@ class Snotebook(object):
         or an empty str
         '''
         if self._template:
-            return Snotebook.get_note(self._template).decode('utf-8')
+            return lib.get_file_content(self._template).decode('utf-8')
         else:
             return ''
 
@@ -139,7 +146,29 @@ class Snotebook(object):
         timestamp = self._timestamp.format(time=current_time)
         return timestamp.encode('utf-8')
 
-    def find_note(self, filename=None):
+    def call_writer(self, load_content, timestamp):
+        '''
+        Opens a temporary file with the configured editor and loads whatever
+        prexisting content is passed in.
+
+        :param load_content: str representation of content to load in editor
+        :param timestamp: bool - True to add timestamp
+        :returns: str of everything in the editor at exit
+        '''
+        with tempfile.NamedTemporaryFile(suffix='.{ext}'.format(ext=self.ext),
+                                         prefix='newsnote_',
+                                         dir=self.location) as tf:
+            tf.write(load_content)
+            if timestamp:
+                tf.write(self.time())
+            tf.flush()
+            subprocess.call([self.editor, tf.name])
+            tf.seek(0)  # hang tight until subprocess is done
+            new_content = tf.read()
+
+        return new_content
+
+    def get_note_path(self, filename=None):
         '''
         Return path to the most recently modified note in notebook, or the
         note with the specified filename
@@ -150,19 +179,24 @@ class Snotebook(object):
         else:
             return self._last_note()
 
-    def _list_notes(self, sort_by='name', reverse=False):
+    def _list_notes(self, sort='name', reverse=False):
         '''
         Return list of notes in notebook (as os.DirEntry) sorted accordingly
         '''
 
         note_list = list()
+
         for entry in os.scandir(self.location):
             note_list.append(entry)
 
-        if sort_by == 'name':
-            note_list.sort(key=filestat_name, reverse=reverse)
-        elif sort_by == 'last':
-            note_list.sort(key=filestat_created, reverse=reverse)
+        if sort == 'name':
+            note_list.sort(key=lambda e: e.name.lower(), reverse=reverse)
+        elif sort == 'last':
+            try:
+                note_list.sort(key=lambda e: e.stat().st_birthtime, reverse=reverse)
+            except AttributeError:
+                note_list.sort(key=lambda e: e.stat().st_ctime,
+                               reverse=reverse)
 
         return note_list
 
@@ -170,6 +204,7 @@ class Snotebook(object):
         '''
         Prompt user with list of DirEntry objects from which to select
         '''
+
         selection = None
         if len(note_list) > 1:
             with sys.stdout as prompt:
@@ -199,22 +234,38 @@ class Snotebook(object):
         Return path to the most recently created (not modified) note in
         notebook
         '''
-        last_modified = self._list_notes('last').pop()
+        last_modified = self._list_notes(sort='last').pop()
         return last_modified.path
 
-    def _search_notes(self, search):
+    def _search_notes(self, search_term):
         '''
-        Return list of files in notebook directory that contain the search term
+        Return list of filenames in notebook directory that contain the search
+        term
         '''
         matches = list()
         for note in self._list_notes():
-            if search in note.name:
+            if search_term in note.name:
                 matches.append(note)
 
         if len(matches) > 0:
             return matches
         else:
-            log.info('No note name containing \'%s\' found', search)
+            log.info('No file containing \'%s\' found', search)
+            sys.exit(1)
+
+    def _search_note_content(self, search_term):
+        '''
+        Return list of notes that contain the search term
+        '''
+        matches = list()
+        for note in self._list_notes():
+            if search_term in note.name:
+                matches.append(note)
+
+        if len(matches) > 0:
+            return matches
+        else:
+            log.info('No note containing \'%s\' found', search)
             sys.exit(1)
 
     def new_note(self, filename=None, timestamp=False):  # FIXME refactor more
@@ -232,15 +283,15 @@ class Snotebook(object):
                                                  ext=self.ext)
         full_notepath = os.path.join(self.location, notepath)
 
-        initial_content = Snotebook.TEMPLATE_TITLE.sub(title, self.template)
+        initial_content = lib.TEMPLATE_TITLE.sub(title, self.template)
 
         new_content = self.call_writer(initial_content.encode('utf-8'), timestamp)
 
         if initial_content != new_content:
-            log.info('Saving note')
-            Snotebook.write_note(full_notepath, new_content)
+            log.debug('Saving note')
+            lib.write_note(full_notepath, new_content)
         else:
-            log.info('No change detected, not saving')
+            log.debug('No change detected, not saving')
 
     def update_note(self, filename=None, timestamp=False):  # FIXME refactor
         '''
@@ -248,14 +299,14 @@ class Snotebook(object):
         writer, saves to snotebook folder upon exit of any changes have been
         made
         '''
-        full_notepath = self.find_note(filename)
+        full_notepath = self.get_note_path(filename)
 
-        initial_content = Snotebook.get_note(full_notepath)
+        initial_content = lib.get_file_content(full_notepath)
 
         new_content = self.call_writer(initial_content, timestamp)
 
         if initial_content != new_content:
-            log.info('Saving note')
-            Snotebook.write_note(full_notepath, new_content)
+            log.debug('Saving note')
+            lib.write_note(full_notepath, new_content)
         else:
-            log.info('No change detected, not saving')
+            log.debug('No change detected, not saving')

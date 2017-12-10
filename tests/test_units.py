@@ -12,25 +12,25 @@ from snote.exceptions import (ConfigError, UnknownNotebookError,
 
 @pytest.fixture(params=['nb1', 'nb2', 'nb3'])
 def snotebook(request):
-    return snote._get_snotebook(request.param)
+    return Snotebook.get_snotebook(request.param)
 
 
 class TestTrueExceptions:
 
     def test_bad_notebook(self):
         with pytest.raises(UnknownNotebookError):
-            snote._get_snotebook('dne')
+            Snotebook.get_snotebook('dne')
 
     def test_bad_notebook_path(self):
         with pytest.raises(InvalidNotebookPathError):
-            snote._get_snotebook('badpath')
+            Snotebook.get_snotebook('badpath')
 
 
 class TestSnotebookConfig:
 
     @pytest.fixture
     def file_config(self):
-        return snote._read_configuration()
+        return snote.lib.get_config()
 
     def test_instance(self, snotebook):
         assert isinstance(snotebook, Snotebook)
@@ -110,18 +110,3 @@ class TestNoteRetrieval:
     def test_last_note(self, snotebook):
         head, tail = os.path.split(snotebook._last_note())
         assert tail == 'So-how-can-you-return-video-tapes'
-
-    def test_select_note(self):
-        pass
-
-    def test_search_notes(self):
-        pass
-
-
-class TestStaticFunctions:
-
-    def test_get_note(self):
-        pass
-
-    def test_write_note(self):
-        pass

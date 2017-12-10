@@ -2,17 +2,16 @@
 # -*- coding: utf-8 -*-
 
 import os
+import re
 import sys
 import logging
 import argparse
-import copy
 import configparser
-from .snotebook import Snotebook
-from .exceptions import (ConfigError, UnknownNotebookError, InvalidNotebookPathError)
+from .exceptions import ConfigError
 
-log = logging.getLogger("snote library")
-log.addHandler(logging.StreamHandler(sys.stdout))
+log = logging.getLogger(__name__)
 
+TEMPLATE_TITLE = re.compile('%TITLE%')
 DEFAULTS = {
     'editor': 'vim',
     'ext': 'md',
@@ -23,92 +22,49 @@ DEFAULTS = {
     'default_title': 'untitled'
 }
 
-debug = os.getenv('SNOTE_DEBUG', False)
-if debug:
-    log.setLevel(logging.DEBUG)
+
+def get_file_content(filepath):  # returns bytes
+    '''
+    Load and return content of file object at filepath
+
+    :param filepath: valid filepath as str
+    :returns: as bytes object
+    '''
+    note = b''
+    with open(filepath, 'r+b') as content:
+        note = content.read()
+    return note
 
 
-def main():
-    parser = argparse.ArgumentParser()
+def write_note(filepath, note):  # write bytes
+    '''
+    Writes to filepath with the content of note
 
-    parser.add_argument('-t', '--timestamp', action='store_true', help='add a'
-                        ' timestamp to the editor')
-    parser.add_argument('-f', '--filename', nargs=1, default=None)
-    parser.add_argument('notebook', help='access notebook')
-    parser.add_argument('subcommand', nargs='?', choices=['new', 'update'],
-                        default='update', help='defaults to update')
-    args = parser.parse_args()
-
-    log.debug('parse_commands: %s', args)
-
-    try:
-        sb = _get_snotebook(args.notebook)
-    except UnknownNotebookError as e:
-        log.error(e)
-        sys.exit(1)
-    except InvalidNotebookPathError as e:
-        log.error(e)
-        sys.exit(1)
-
-    if args.subcommand == 'update':
-        sb.update_note(args.filename, args.timestamp)
-
-    if args.subcommand == 'new':
-        sb.new_note(args.filename, args.timestamp)
+    :param filepath: valid filepath as str
+    :param note: str representation of content to write
+    '''
+    with open(filepath, 'w+b') as content:
+        content.write(note)
+    log.info('Note saved')
 
 
-def _get_configuration_filepath(snoteenv='SNOTE'):
-    config_file = os.getenv(snoteenv, None)
-    if config_file and os.path.exists(config_file):
-        log.info('Configuration file path is configured and exists')
-        return config_file
+def get_config(envvar='SNOTE'):
+
+    config_path = os.getenv(envvar, None)
+
+    if config_path and os.path.exists(config_path):
+        log.debug('Configuration file path is configured and exists')
     else:
-        raise ConfigError('Configuration file %s path not configured' %
-                          config_file)
-
-
-def _read_configuration():
-    try:
-        config_file = _get_configuration_filepath()
-    except ConfigError as e:
-        log.error(e)
-        sys.exit(1)
+        raise FileNotFoundError(config_path)
 
     config = configparser.ConfigParser(defaults=DEFAULTS,
                                        default_section='global',
                                        interpolation=None,
                                        allow_no_value=True)
-    with open(config_file, 'r') as cfg:
+
+    with open(config_path, 'r') as cfg:
         cfg_txt = os.path.expandvars(cfg.read())
+
     config.read_string(cfg_txt)
+
     return config
-
-
-def _get_snotebook(notebook):
-    """Returns Snotebook object if given the name of a configured Snotebook."""
-
-    config = _read_configuration()
-
-    if config.has_section(notebook):
-        log.debug('Notebook exists, great success')
-    else:
-        raise UnknownNotebookError(notebook)
-
-    if os.path.exists(config.get(notebook, 'path')):
-        log.debug('Configured path exists, great success')
-    else:
-        raise InvalidNotebookPathError(config.get(notebook, 'path'))
-
-    snotebook_cfg = {
-        'name': notebook,
-        'location': config.get(notebook, 'path'),
-        'editor': config.get(notebook, 'editor'),
-        'ext': config.get(notebook, 'ext'),
-        'datefmt': config.get(notebook, 'datefmt'),
-        'timefmt': config.get(notebook, 'timefmt'),
-        'timestamp': config.get(notebook, 'timestamp'),
-        'template': config.get(notebook, 'template'),
-        'default_title': config.get(notebook, 'default_title')
-    }
-
-    return Snotebook(**snotebook_cfg)
