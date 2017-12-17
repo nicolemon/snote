@@ -193,7 +193,8 @@ class Snotebook(object):
             note_list.sort(key=lambda e: e.name.lower(), reverse=reverse)
         elif sort == 'last':
             try:
-                note_list.sort(key=lambda e: e.stat().st_birthtime, reverse=reverse)
+                note_list.sort(key=lambda e: e.stat().st_birthtime,
+                               reverse=reverse)
             except AttributeError:
                 note_list.sort(key=lambda e: e.stat().st_ctime,
                                reverse=reverse)
@@ -209,8 +210,9 @@ class Snotebook(object):
         if len(note_list) > 1:
             with sys.stdout as prompt:
                 prompt.write('Multiple notes found\n')
+                file_prompt = '[{idx}] {filename}\n'
                 for idx, file in enumerate(note_list):
-                    note = '[{idx}] {filename}\n'.format(idx=idx + 1, filename=file.name)
+                    note = file_prompt.format(idx=idx + 1, filename=file.name)
                     prompt.write(note)
                 prompt.write('Select: ')
 
