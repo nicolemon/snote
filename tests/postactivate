@@ -1,0 +1,31 @@
+#!/bin/zsh
+# This hook is sourced after this virtualenv is activated.
+
+project_dir="$(cat $VIRTUAL_ENV/.project)"
+
+cp -R "$project_dir/tests/assets" "$HOME/snote-assets"
+
+snotebooks=(
+  "nb1"
+  "nb2"
+  "nb3"
+)
+
+snotes=(
+  "first-post"
+  "second-note"
+  "third-entry"
+  "another-note"
+  "I-have-to-return-some-video-tapes"
+  "Blockbuster-doesnt-exist-anymore-though"
+  "So-how-can-you-return-video-tapes"
+)
+
+for sb in ${snotebooks[@]}; do
+  mkdir -p "$HOME/snotebooks/$sb"
+  for note in ${snotes[@]}; do
+    echo "$note\n$(date)" > "$HOME/snotebooks/$sb/$note" && sleep 1
+  done
+done
+
+export SNOTE=$HOME/snote-assets/snoterc
