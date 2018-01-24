@@ -6,7 +6,7 @@ from .snotebook import (EditSnoteParser, Snotebook)
 import argparse
 
 
-VERSION = '0.0.3a'
+VERSION = '0.1.0'
 
 
 def main():
