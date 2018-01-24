@@ -3,6 +3,7 @@
 
 import os
 import sys
+import re
 import datetime
 import subprocess
 import tempfile
@@ -14,32 +15,20 @@ from .exceptions import (UnknownNotebookError, InvalidNotebookPathError)
 log = logging.getLogger(__name__)
 
 
-class SnoteParser(argparse.ArgumentParser):
+class EditSnoteParser(argparse.ArgumentParser):
 
     def __init__(self):
-        super(SnoteParser, self).__init__()
-
-        self.add_argument('notebook', help='access notebook')
-
-        self.add_argument(
-            'subcommand',
-            nargs='?',
-            choices=['new', 'update'],
-            default='update',
-            help='defaults to update'
-        )
-
+        super(EditSnoteParser, self).__init__(add_help=False)
         self.add_argument(
             '-t',
             '--timestamp',
             action='store_true',
             help='add a timestamp to the note'
         )
-
         self.add_argument(
             '-f',
             '--filename',
-            nargs=1,
+            type=str,
             default=None,
             help='name a new note, or search for a note to update'
         )
@@ -174,7 +163,7 @@ class Snotebook(object):
         note with the specified filename
         '''
         if filename:
-            notes = self._search_notes(filename.pop())
+            notes = self._search_notes(filename)
             return self._select_note(notes)
         else:
             return self._last_note()
@@ -245,29 +234,17 @@ class Snotebook(object):
         term
         '''
         matches = list()
+        hypenated_search = '-'.join(search_term.split())
+        search_pattern = re.compile(search_term, re.I)
+        hyphenated_search_pattern = re.compile(hypenated_search, re.I)
         for note in self._list_notes():
-            if search_term in note.name:
+            if search_pattern.search(note.name) or hyphenated_search_pattern.search(note.name):
                 matches.append(note)
 
         if len(matches) > 0:
             return matches
         else:
             log.info('No file containing \'%s\' found', search_term)
-            sys.exit(1)
-
-    def _search_note_content(self, search_term):
-        '''
-        Return list of notes that contain the search term
-        '''
-        matches = list()
-        for note in self._list_notes():
-            if search_term in note.name:
-                matches.append(note)
-
-        if len(matches) > 0:
-            return matches
-        else:
-            log.info('No note containing \'%s\' found', search)
             sys.exit(1)
 
     def new_note(self, filename=None, timestamp=False):  # FIXME refactor more
@@ -302,7 +279,6 @@ class Snotebook(object):
         made
         '''
         full_notepath = self.get_note_path(filename)
-
         initial_content = lib.get_file_content(full_notepath)
 
         new_content = self.call_writer(initial_content, timestamp)
@@ -312,3 +288,20 @@ class Snotebook(object):
             lib.write_note(full_notepath, new_content)
         else:
             log.debug('No change detected, not saving')
+
+    def list_notes(self, max_notes=0):
+        note_list = self._list_notes(reverse=True)
+        note_name = '{0}\t{1}\n'
+        if max_notes > 0:
+            end_idx = max_notes
+        else:
+            end_idx = len(note_list)
+        with sys.stdout as stream:
+            stream.write(note_name.format('Date\t', 'Title'))
+            stream.write(note_name.format('===\t', '==='))
+            for file in note_list[0:end_idx]:
+                note = file.name
+                date = ' '.join(note.split('-')[0:3])  # separate date
+                title = ' '.join(note.split('-')[3:])  # remove hyphens
+                title = title.split('.')[0:-1][0]  # remove extension
+                stream.write(note_name.format(date, title))

@@ -5,7 +5,6 @@ import os
 import re
 import sys
 import logging
-import argparse
 import configparser
 from .exceptions import ConfigError
 
