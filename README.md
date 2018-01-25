@@ -38,10 +38,11 @@ apply to all notebooks, and may be overwritten at a notebook level.
 
 ## Usage
 
-    usage: snote [-h] [-t] [-f FILENAME] notebook {new|update|list} ...
+    usage: snote [-h] [-t] [-f FILENAME]
+                 notebook {update,u,new,n,list,l,ls,search,s} ...
 
     positional arguments:
-      notebook              access notebook
+      notebook              name of notebook to access
 
     optional arguments:
       -h, --help            show this help message and exit
@@ -50,10 +51,12 @@ apply to all notebooks, and may be overwritten at a notebook level.
                             name a new note, or search for a note to update
 
     actions:
-      {new|update|list}     notebook action, defaults to update
-        update              edit note; default action
-        list                list notes in notebook
-        new                 create new note
+      {update,u,new,n,list,l,ls,search,s}
+                            notebook action, defaults to update
+        update (u)          edit note; default action
+        new (n)             create new note
+        list (l, ls)        list note titles in notebook
+        search (s)          list note titles containing the search term
 
 ## Motivaton
 
