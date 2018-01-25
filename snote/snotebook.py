@@ -190,6 +190,26 @@ class Snotebook(object):
 
         return note_list
 
+    def display_note_info(self, file):
+        note = file.name
+        date = '.'.join(note.split('-')[0:3])  # separate date
+        title = ' '.join(note.split('-')[3:])  # remove hyphens
+        title = title.split('.')[0:-1][0]  # remove extension
+        return (date, title)
+
+    def _show_note_list(self, note_list, max_notes=0):
+        note_name = '{:<12}{:<50}\n'
+        if max_notes > 0:
+            end_idx = max_notes
+        else:
+            end_idx = len(note_list)
+        with sys.stdout as stream:
+            stream.write(note_name.format('Date', 'Title'))
+            stream.write('{:=^62}\n'.format(''))
+            for file in note_list[0:end_idx]:
+                date, title = self.display_note_info(file)
+                stream.write(note_name.format(date, title))
+
     def _select_note(self, note_list):  # FIXME refactor/make better thanks
         '''
         Prompt user with list of DirEntry objects from which to select
@@ -199,9 +219,12 @@ class Snotebook(object):
         if len(note_list) > 1:
             with sys.stdout as prompt:
                 prompt.write('Multiple notes found\n')
-                file_prompt = '[{idx}] {filename}\n'
+                list_item = '{:>5} {:<12}{:<50}\n'
+                prompt.write(list_item.format('', 'Date', 'Title'))
                 for idx, file in enumerate(note_list):
-                    note = file_prompt.format(idx=idx + 1, filename=file.name)
+                    selection_no = '[{}]'.format(idx + 1)
+                    date, title = self.display_note_info(file)
+                    note = list_item.format(selection_no, date, title)
                     prompt.write(note)
                 prompt.write('Select: ')
 
@@ -291,17 +314,8 @@ class Snotebook(object):
 
     def list_notes(self, max_notes=0):
         note_list = self._list_notes(reverse=True)
-        note_name = '{0}\t{1}\n'
-        if max_notes > 0:
-            end_idx = max_notes
-        else:
-            end_idx = len(note_list)
-        with sys.stdout as stream:
-            stream.write(note_name.format('Date\t', 'Title'))
-            stream.write(note_name.format('===\t', '==='))
-            for file in note_list[0:end_idx]:
-                note = file.name
-                date = ' '.join(note.split('-')[0:3])  # separate date
-                title = ' '.join(note.split('-')[3:])  # remove hyphens
-                title = title.split('.')[0:-1][0]  # remove extension
-                stream.write(note_name.format(date, title))
+        self._show_note_list(note_list, max_notes)
+
+    def search_notes(self, search_term):
+        note_list = self._search_notes(search_term)
+        self._show_note_list(note_list)
