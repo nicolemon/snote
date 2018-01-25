@@ -110,3 +110,33 @@ class TestNoteRetrieval:
     def test_last_note(self, snotebook):
         head, tail = os.path.split(snotebook._last_note())
         assert tail == 'So-how-can-you-return-video-tapes'
+
+    def test_search_one(self, snotebook):
+        expected = [
+            'another-note',
+            'second-note'
+        ]
+
+        actual = [entry.name for entry in snotebook._search_notes('note')]
+
+        assert actual == expected
+
+    def test_search_two(self, snotebook):
+        expected = [
+            'I-have-to-return-some-video-tapes',
+            'So-how-can-you-return-video-tapes'
+        ]
+
+        actual = [entry.name for entry in snotebook._search_notes('video')]
+
+        assert actual == expected
+
+    def test_search_hyphenated(self, snotebook):
+        with_hyphen = [entry.name for entry in snotebook._search_notes('video-tapes')]
+        without_hyphen = [entry.name for entry in snotebook._search_notes('video tapes')]
+        mixed_case = [entry.name for entry in snotebook._search_notes('Video Tapes')]
+        mixed_case_hyphen = [entry.name for entry in snotebook._search_notes('Video-tapes')]
+
+        assert with_hyphen == without_hyphen
+        assert mixed_case == mixed_case_hyphen
+        assert with_hyphen == mixed_case
