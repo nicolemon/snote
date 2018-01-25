@@ -276,7 +276,7 @@ class Snotebook(object):
         snotebook folder upon exit if any changes have been made
         '''
         if filename:
-            title = filename.pop()
+            title = filename
         else:
             title = self.default_title
 
