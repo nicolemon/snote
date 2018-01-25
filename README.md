@@ -38,16 +38,22 @@ apply to all notebooks, and may be overwritten at a notebook level.
 
 ## Usage
 
-    usage: snote [-h] [-t] [-f FILENAME] notebook [{new,update}]
+    usage: snote [-h] [-t] [-f FILENAME] notebook {new|update|list} ...
 
     positional arguments:
       notebook              access notebook
-      {new,update}          defaults to update
 
     optional arguments:
       -h, --help            show this help message and exit
-      -t, --timestamp       add a timestamp to the editor
+      -t, --timestamp       add a timestamp to the note
       -f FILENAME, --filename FILENAME
+                            name a new note, or search for a note to update
+
+    actions:
+      {new|update|list}     notebook action, defaults to update
+        update              edit note; default action
+        list                list notes in notebook
+        new                 create new note
 
 ## Motivaton
 

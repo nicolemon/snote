@@ -16,9 +16,9 @@ def main():
     subparsers = parser.add_subparsers(title='actions',
                                        metavar='{new|update|list}',
                                        dest='note_action',
-                                       help='notebook action')
+                                       help='notebook action, defaults to update')
     parser.set_defaults(note_action='update')
-    parser_update = subparsers.add_parser('update', parents=[edit_args], help='edit note')
+    parser_update = subparsers.add_parser('update', parents=[edit_args], help='edit note; default action')
     parser_list = subparsers.add_parser('list', help='list notes in notebook')
     parser_list.add_argument(
         '-n',
