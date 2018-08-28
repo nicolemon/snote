@@ -151,8 +151,7 @@ class Snotebook(object):
         :returns: str of everything in the editor at exit
         '''
         with tempfile.NamedTemporaryFile(suffix='.{ext}'.format(ext=self.ext),
-                                         prefix='newsnote_',
-                                         dir=self.location) as tf:
+                                         prefix='snote_') as tf:
             tf.write(load_content)
             if timestamp:
                 tf.write(self.time())
