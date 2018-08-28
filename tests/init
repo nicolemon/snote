@@ -1,26 +1,32 @@
 #!/usr/bin/env bash
 
-cp -R "$TRAVIS_BUILD_DIR/tests/assets" "$HOME/snote-assets"
+project_dir="$TRAVIS_BUILD_DIR"
+snote_dir="$HOME/test-snotebooks"
+
+if [ -e $snote_dir ]; then
+    rm -rf $snote_dir
+fi
+
+cp -R "$project_dir/tests/assets/" "$snote_dir"
 
 snotebooks=(
-  "nb1"
-  "nb2"
-  "nb3"
+    "nb1"
+    "nb2"
+    "nb3"
 )
 
 snotes=(
-  "first-post"
-  "second-note"
-  "third-entry"
-  "another-note"
-  "I-have-to-return-some-video-tapes"
-  "Blockbuster-doesnt-exist-anymore-though"
-  "So-how-can-you-return-video-tapes"
+    "2016-04-22-first-post"
+    "2016-04-22-second-note"
+    "2016-04-23-third-entry"
+    "2016-05-02-another-note"
+    "2016-07-15-Blockbuster-doesnt-exist-anymore-though"
+    "2016-07-15-I-have-to-return-some-video-tapes"
+    "2016-08-01-So-how-can-you-return-video-tapes"
 )
 
-for sb in ${snotebooks[@]}; do
-  mkdir -p "$HOME/snotebooks/$sb"
-  for note in ${snotes[@]}; do
-    echo "$note\n$(date)" > "$HOME/snotebooks/$sb/$note" && sleep 1
+for sb in "${snotebooks[@]}"; do
+  for note in "${snotes[@]}"; do
+    touch "$snote_dir/$sb/$note" && sleep 0.3
   done
 done

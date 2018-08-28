@@ -65,6 +65,7 @@ class Snotebook(object):
             'timefmt': config.get(notebook, 'timefmt'),
             'timestamp': config.get(notebook, 'timestamp'),
             'template': config.get(notebook, 'template'),
+            'max_list': config.get(notebook, 'max_list', fallback=-1),
             'default_title': config.get(notebook, 'default_title')
         }
 
@@ -72,7 +73,7 @@ class Snotebook(object):
 
     def __init__(self, name, location, editor='vim', ext='md',
                  datefmt='%Y-%m-%d', timefmt='%H:%M:%S',
-                 timestamp='\n{time}', template=None, default_title=None):
+                 timestamp='\n{time}', template=None, max_list=-1, default_title=None):
         self._name = name
         self._location = location
         self._editor = editor
@@ -81,6 +82,7 @@ class Snotebook(object):
         self._timefmt = timefmt
         self._timestamp = timestamp
         self._template = template
+        self._max_list = max_list
         self._default_title = default_title
 
     @property
@@ -109,6 +111,10 @@ class Snotebook(object):
             return lib.get_file_content(self._template).decode('utf-8')
         else:
             return ''
+
+    @property
+    def max_list(self):
+        return int(self._max_list)
 
     @property
     def default_title(self):
@@ -194,15 +200,23 @@ class Snotebook(object):
         note = file.name
         date = '.'.join(note.split('-')[0:3])  # separate date
         title = ' '.join(note.split('-')[3:])  # remove hyphens
-        title = title.split('.')[0:-1][0]  # remove extension
+        title = title.split('.')
+        if len(title) > 1:
+            title = title[0:-1]  # remove extension if there is one
+        title = ''.join(title)
         return (date, title)
 
-    def _show_note_list(self, note_list, max_notes=0):
+    def _show_note_list(self, note_list, max_list=None):
         note_name = '{:<12}{:<50}\n'
-        if max_notes > 0:
-            end_idx = max_notes
+        all_len = len(note_list)
+        if not max_list:  # no value passed, go to default
+            max_list = self.max_list
+
+        if max_list < 1:  # user did not set a default value OR passed in 0
+            end_idx = all_len
         else:
-            end_idx = len(note_list)
+            end_idx = min(all_len, max_list)
+
         with sys.stdout as stream:
             stream.write(note_name.format('Date', 'Title'))
             stream.write('{:=^62}\n'.format(''))

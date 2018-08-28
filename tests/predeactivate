@@ -1,0 +1,8 @@
+#!/usr/bin/zsh
+# This hook is sourced before every virtualenv is deactivated.
+
+local snote_dir
+
+unset SNOTE
+snote_dir="$HOME/test-snotebooks"
+rm -rf $snote_dir

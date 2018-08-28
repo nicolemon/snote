@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-"""Unit tests for library and class function"""
+'''Unit tests for library and class function'''
 
 import os
 import pytest
@@ -49,13 +49,13 @@ class TestNoteRetrieval:
 
     def test_list_notes_name(self, snotebook):
         expected = [
-            'another-note',
-            'Blockbuster-doesnt-exist-anymore-though',
-            'first-post',
-            'I-have-to-return-some-video-tapes',
-            'second-note',
-            'So-how-can-you-return-video-tapes',
-            'third-entry'
+            '2016-04-22-first-post',
+            '2016-04-22-second-note',
+            '2016-04-23-third-entry',
+            '2016-05-02-another-note',
+            '2016-07-15-Blockbuster-doesnt-exist-anymore-though',
+            '2016-07-15-I-have-to-return-some-video-tapes',
+            '2016-08-01-So-how-can-you-return-video-tapes'
         ]
 
         actual = [entry.name for entry in snotebook._list_notes()]
@@ -64,13 +64,13 @@ class TestNoteRetrieval:
 
     def test_list_notes_reverse_name(self, snotebook):
         expected = [
-            'third-entry',
-            'So-how-can-you-return-video-tapes',
-            'second-note',
-            'I-have-to-return-some-video-tapes',
-            'first-post',
-            'Blockbuster-doesnt-exist-anymore-though',
-            'another-note'
+            '2016-08-01-So-how-can-you-return-video-tapes',
+            '2016-07-15-I-have-to-return-some-video-tapes',
+            '2016-07-15-Blockbuster-doesnt-exist-anymore-though',
+            '2016-05-02-another-note',
+            '2016-04-23-third-entry',
+            '2016-04-22-second-note',
+            '2016-04-22-first-post'
         ]
 
         actual = [entry.name for entry in snotebook._list_notes(reverse=True)]
@@ -79,28 +79,28 @@ class TestNoteRetrieval:
 
     def test_list_notes_last(self, snotebook):
         expected = [
-            'first-post',
-            'second-note',
-            'third-entry',
-            'another-note',
-            'I-have-to-return-some-video-tapes',
-            'Blockbuster-doesnt-exist-anymore-though',
-            'So-how-can-you-return-video-tapes'
+            '2016-04-22-first-post',
+            '2016-04-22-second-note',
+            '2016-04-23-third-entry',
+            '2016-05-02-another-note',
+            '2016-07-15-Blockbuster-doesnt-exist-anymore-though',
+            '2016-07-15-I-have-to-return-some-video-tapes',
+            '2016-08-01-So-how-can-you-return-video-tapes'
         ]
 
         actual = [entry.name for entry in snotebook._list_notes('last')]
 
         assert actual == expected
 
-    def test_list_notes_last(self, snotebook):
+    def test_list_notes_last_reverse(self, snotebook):
         expected = [
-            'So-how-can-you-return-video-tapes',
-            'Blockbuster-doesnt-exist-anymore-though',
-            'I-have-to-return-some-video-tapes',
-            'another-note',
-            'third-entry',
-            'second-note',
-            'first-post'
+            '2016-08-01-So-how-can-you-return-video-tapes',
+            '2016-07-15-I-have-to-return-some-video-tapes',
+            '2016-07-15-Blockbuster-doesnt-exist-anymore-though',
+            '2016-05-02-another-note',
+            '2016-04-23-third-entry',
+            '2016-04-22-second-note',
+            '2016-04-22-first-post'
         ]
 
         actual = [entry.name for entry in snotebook._list_notes('last', True)]
@@ -109,12 +109,12 @@ class TestNoteRetrieval:
 
     def test_last_note(self, snotebook):
         head, tail = os.path.split(snotebook._last_note())
-        assert tail == 'So-how-can-you-return-video-tapes'
+        assert tail == '2016-08-01-So-how-can-you-return-video-tapes'
 
     def test_search_one(self, snotebook):
         expected = [
-            'another-note',
-            'second-note'
+            '2016-04-22-second-note',
+            '2016-05-02-another-note'
         ]
 
         actual = [entry.name for entry in snotebook._search_notes('note')]
@@ -123,8 +123,8 @@ class TestNoteRetrieval:
 
     def test_search_two(self, snotebook):
         expected = [
-            'I-have-to-return-some-video-tapes',
-            'So-how-can-you-return-video-tapes'
+            '2016-07-15-I-have-to-return-some-video-tapes',
+            '2016-08-01-So-how-can-you-return-video-tapes'
         ]
 
         actual = [entry.name for entry in snotebook._search_notes('video')]
