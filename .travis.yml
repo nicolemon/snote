@@ -10,8 +10,7 @@ python:
   - "3.5"
   - "3.5-dev" # 3.5 development branch
   - "3.6"
-  - "3.7"
-  - "3.8-dev"
+  - "3.7-dev"
   - "nightly"
 before_script:  # commands to run before running tests
   - "$TRAVIS_BUILD_DIR/tests/init"
